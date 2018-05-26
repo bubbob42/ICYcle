@@ -1,0 +1,64 @@
+#
+# SAS/C Makefile for ICYcle
+#
+
+#
+# Program major version
+#
+VERSION_MAJOR = 1
+
+OBJS_REL = main.o
+OBJS_NODEBUG = main_nodebug.o
+OBJS_DEBUG = main_debug.o
+
+#
+# Generate version with debug output (all optimisations disabled, default target)
+#
+debug: $(OBJS_DEBUG)
+   sc link to ICYcle_debug with <<
+$(OBJS_DEBUG) lib:debug.lib
+<
+
+main_debug.o: main.c
+        sc main.c objectname main_debug.o DEFINE _DEBUG_ NOOPT MATH=STANDARD
+        
+#
+# Generate version without debug output (all optimisations disabled)
+#    
+nodebug: $(OBJS_NODEBUG)
+   sc link to ICYcle_nodebug with <<
+$(OBJS_NODEBUG)
+<
+
+main_nodebug.o: main.c
+        sc main.c objectname main_nodebug.o NOOPT
+
+#
+# bump rev & release
+#
+bumprev:
+   bumprev $(VERSION_MAJOR) ICYcle_rev
+   smake release
+   smake nodebug
+   smake debug
+   
+#
+# Generate release version (all optimisations enabled)
+#
+release: $(OBJS_REL)
+   
+   sc link to ICYcle with <<
+   $(OBJS_REL)
+   <
+
+   copy ICYcle /Release/ICYcle
+
+main.o: main.c
+        
+#
+# cleanup stuff
+#
+clean:
+        delete \#?.o \#?.lnk \#?.map \#?.gst ICYcle ICYcle_debug ICYcle_nodebug
+
+        
